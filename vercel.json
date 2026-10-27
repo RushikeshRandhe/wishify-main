@@ -1,0 +1,54 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/classic/:slug",
+      "destination": "/templates/birthday-templates/birthday1/view?slug=:slug"
+    },
+    {
+      "source": "/timeline/:slug",
+      "destination": "/templates/birthday-templates/birthday2/view?slug=:slug"
+    },
+    {
+      "source": "/quiz/:slug",
+      "destination": "/templates/birthday-templates/birthday-quiz/view?slug=:slug"
+    },
+    {
+      "source": "/journey/:slug",
+      "destination": "/templates/birthday-templates/birthday-journey/view?slug=:slug"
+    },
+    {
+    "source": "/Love-String/:slug",
+    "destination": "/templates/birthday-templates/Love-String/view?slug=:slug"
+    },
+    {
+    "source": "/Password-special/:slug",
+    "destination": "/templates/birthday-templates/Password-special/view?slug=:slug"
+    },
+    {
+    "source": "/cinematic-surprise/:slug",
+    "destination": "/templates/birthday-templates/Cinematic-surprice/view?slug=:slug"
+    },
+    {
+  "source": "/neon-light-tree/:slug",
+  "destination": "/templates/birthday-templates/neon-light-tree/view?slug=:slug"
+    },
+    {
+  "source": "/Love-Heart/:slug",
+  "destination": "/templates/birthday-templates/Love-Heart/view?slug=:slug"
+    },
+    {
+  "source": "/pigeon-msg-heart/:slug",
+  "destination": "/templates/birthday-templates/pigeon-msg-heart/view?slug=:slug"
+},
+{
+  "source": "/Flower-Garden/:slug",
+  "destination": "/templates/birthday-templates/Flower-Garden/view?slug=:slug"
+},
+
+    {
+      "source": "/wedding/:slug",
+      "destination": "/templates/wedding-templates/wedding/view?slug=:slug"
+    }
+  ]
+}

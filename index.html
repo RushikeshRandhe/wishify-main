@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Create personalized birthday wishes, cards, and greeting pages in seconds. Add photos, messages, and share instantly on WhatsApp or Instagram — free, no design skills needed." />
+  <meta property="og:title" content="WishCraft – Birthday Wishes & Greeting Cards" />
+  <meta property="og:description" content="Create and share beautiful birthday wishes in seconds. Free templates, no coding needed." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mywishfy.com" />
+  <meta property="og:image" content="https://mywishfy.com/preview.png" />
+  <meta name="google-site-verification" content="3P-v2DhTdao3vUxLu11-ehHvrlZyBYp0dDGq4EW2BF4" />
+  <title>WishCraft – Birthday Wishes, Cards & Greetings Generator Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <script>
+    /* Default is always light mode; dark mode only applies if the user
+       explicitly toggled it on a previous visit (ignores system preference). */
+    (function () {
+      try {
+        var saved = localStorage.getItem('wishcraft-theme');
+        var theme = saved === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+<!-- Scroll progress bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║            NAVBAR                ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">🎊</div>
+      <span>Wishfy</span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#categories">Templates</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#">Gallery</a></li>
+      <li><a href="#">Pricing</a></li>
+    </ul>
+
+    <div class="nav-cta">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle night mode" title="Toggle night mode">
+        <span class="toggle-knob" id="toggleKnob">☀️</span>
+      </button>
+      <a href="#" class="btn-outline" style="padding:.6rem 1.4rem;font-size:.88rem;">Sign in</a>
+      <a href="#" class="btn-primary" style="padding:.6rem 1.4rem;font-size:.88rem;">Start Free</a>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="#categories">Templates</a>
+    <a href="#how">How it Works</a>
+    <a href="#">Gallery</a>
+    <a href="#">Pricing</a>
+    <a href="#">Sign In</a>
+    <div class="theme-toggle-row">
+      <span style="font-size:.9rem;font-weight:600;color:var(--muted);">Night mode</span>
+      <button class="theme-toggle" id="themeToggleMobile" aria-label="Toggle night mode">
+        <span class="toggle-knob" id="toggleKnobMobile">☀️</span>
+      </button>
+    </div>
+    <a href="#" class="btn-primary">Start Free ✨</a>
+  </nav>
+</header>
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║              HERO                ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<section class="hero">
+  <!-- Decorative confetti SVG -->
+  <svg class="confetti-burst" viewBox="0 0 520 520" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="460" cy="80"  r="22" fill="#f4a733" opacity=".5"/>
+    <circle cx="390" cy="30"  r="12" fill="#e8506a" opacity=".45"/>
+    <circle cx="490" cy="170" r="16" fill="#7c4dbd" opacity=".4"/>
+    <rect x="320" y="60"  width="18" height="18" rx="4" fill="#e8506a" opacity=".45" transform="rotate(25 320 60)"/>
+    <rect x="430" y="240" width="14" height="14" rx="3" fill="#f4a733" opacity=".4"  transform="rotate(-15 430 240)"/>
+    <rect x="360" y="140" width="10" height="10" rx="2" fill="#7c4dbd" opacity=".35" transform="rotate(40 360 140)"/>
+    <path d="M480 310 Q500 280 520 310 Q500 340 480 310Z" fill="#e8506a" opacity=".35"/>
+    <path d="M350 220 Q370 195 390 220 Q370 245 350 220Z" fill="#f4a733" opacity=".38"/>
+    <circle cx="310" cy="310" r="8" fill="#e8506a" opacity=".3"/>
+    <circle cx="500" cy="400" r="14" fill="#f4a733" opacity=".3"/>
+    <rect x="260" y="180" width="9" height="9" rx="2" fill="#7c4dbd" opacity=".3" transform="rotate(20 260 180)"/>
+  </svg>
+
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-eyebrow">🎉 No coding needed</div>
+        <h1>Create beautiful<br/><em>wishes in seconds</em></h1>
+        <p class="hero-desc">
+          Pick a template, add a photo, write your message — and share a celebration page your loved ones will never forget.
+        </p>
+        <div class="hero-actions">
+          <a href="#categories" class="btn-primary">Browse Templates ✨</a>
+          <a href="#how" class="btn-outline">See how it works</a>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-avatars">
+            <span>A</span><span>M</span><span>P</span><span>R</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="card-stack">
+          <div class="wish-card wish-card-1">
+            <div class="wc-emoji">🎂</div>
+            <div class="wc-title">Happy Birthday!</div>
+            <div class="wc-msg">Wishing you a day filled with joy and laughter…</div>
+          </div>
+          <div class="wish-card wish-card-2">
+            <div class="wc-emoji">💍</div>
+            <div class="wc-title">Congratulations!</div>
+            <div class="wc-msg">May your love story be forever beautiful…</div>
+          </div>
+          <div class="wish-card wish-card-3">
+            <div class="wc-emoji">🎆</div>
+            <div class="wc-title">Happy Diwali!</div>
+            <div class="wc-msg">May the festival of lights brighten your life…</div>
+            <div class="wc-name">— From Priya & Family ♥</div>
+          </div>
+        </div>
+        <div class="floating-badge">
+          <span class="badge-dot"></span> Just created by Rushikesh
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║           CATEGORIES             ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<section class="categories" id="categories">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Choose your occasion</span>
+      <h2>Every celebration deserves<br/>its own page</h2>
+      <p>Pick a category and personalise a template in minutes.</p>
+    </div>
+
+    <div class="cat-grid reveal-stagger reveal" id="catGrid">
+      <a href="templates/birthday-gallery.html" class="cat-card cat-birthday">
+        <div class="cat-thumb">
+          🎂
+          <span class="cat-thumb-label">Birthday</span>
+        </div>
+        <div class="cat-body">
+          <h3>Birthday Wishes</h3>
+          <p>Create free birthday wishes online — add photos, your message, and even a song for a surprise they'll love.</p>
+          <span class="cat-link">Explore →</span>
+        </div>
+      </a>
+
+      <a href="templates/wedding-gallery.html" class="cat-card cat-marriage">
+        <div class="cat-thumb">
+          💍
+          <span class="cat-thumb-label">Marriage</span>
+        </div>
+        <div class="cat-body">
+          <h3>Wedding Wishes</h3>
+          <p>Beautiful cards for the couple — with photos, vows and warm greetings.</p>
+          <span class="cat-link">Explore →</span>
+        </div>
+      </a>
+
+      <div class="cat-card cat-diwali">
+        <div class="cat-thumb">
+          🪔
+          <span class="cat-thumb-label">Diwali</span>
+        </div>
+        <div class="cat-body">
+          <h3>Diwali Greetings</h3>
+          <p>Festive templates glowing with diyas and lights for your whole family.</p>
+          <span class="cat-link">Explore →</span>
+        </div>
+      </div>
+
+      <div class="cat-card cat-holi">
+        <div class="cat-thumb">
+          🎨
+          <span class="cat-thumb-label">Holi</span>
+        </div>
+        <div class="cat-body">
+          <h3>Holi Cards</h3>
+          <p>Colourful splash designs to share the joy of the festival of colours.</p>
+          <span class="cat-link">Explore →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║          HOW IT WORKS            ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Three simple steps</span>
+      <h2>Make it yours in minutes</h2>
+      <p>No design skills, no coding — just you and a blank canvas.</p>
+    </div>
+
+    <div class="steps-grid reveal">
+      <div class="step">
+        <div class="step-num">🎨</div>
+        <h3>Pick a template</h3>
+        <p>Browse our library of ready-made designs for birthdays, weddings, Diwali, Holi and more.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">✏️</div>
+        <h3>Customise freely</h3>
+        <p>Add your photos, write your message, change colours and backgrounds — all with simple clicks.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">🔗</div>
+        <h3>Share the link</h3>
+        <p>Copy one link and send it over WhatsApp, Instagram or anywhere else. No app needed to view it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║             FOOTER               ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-icon">🎊</div>
+          Wish<span>Craft</span>
+        </a>
+        <p>Create, personalise and share beautiful celebration pages for every occasion — no coding needed.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Templates</h4>
+        <ul>
+          <li><a href="#">Birthday</a></li>
+          <li><a href="#">Wedding</a></li>
+          <li><a href="#">Diwali</a></li>
+          <li><a href="#">Holi</a></li>
+          <li><a href="#">Anniversary</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">How it Works</a></li>
+          <li><a href="#">Gallery</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-socials">
+        <div class="social-btn" title="Instagram">📸</div>
+        <div class="social-btn" title="WhatsApp">💬</div>
+        <div class="social-btn" title="Twitter/X">🐦</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to top button -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║         JAVASCRIPT               ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<script>
+  /* ── Mobile menu toggle ─────────────────────────────────── */
+  const hamburger   = document.getElementById('hamburger');
+  const mobileMenu  = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    hamburger.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', isOpen);
+  });
+
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+      hamburger.classList.remove('open');
+    });
+  });
+
+  /* ── Dark / night mode toggle ───────────────────────────── */
+  const root          = document.documentElement;
+  const toggleBtn      = document.getElementById('themeToggle');
+  const toggleKnob      = document.getElementById('toggleKnob');
+  const toggleBtnMobile = document.getElementById('themeToggleMobile');
+  const toggleKnobMobile= document.getElementById('toggleKnobMobile');
+
+  function applyIcon() {
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    const icon = isDark ? '🌙' : '☀️';
+    toggleKnob.textContent = icon;
+    toggleKnobMobile.textContent = icon;
+  }
+  applyIcon();
+
+  function toggleTheme() {
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    applyIcon();
+    try { localStorage.setItem('wishcraft-theme', next); } catch (e) {}
+  }
+
+  toggleBtn.addEventListener('click', toggleTheme);
+  toggleBtnMobile.addEventListener('click', toggleTheme);
+
+  /* ── Scroll-reveal via IntersectionObserver ─────────────── */
+  const revealEls = document.querySelectorAll('.reveal');
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => revealObserver.observe(el));
+
+  /* ── Scroll progress bar ─────────────────────────────────── */
+  const scrollProgress = document.getElementById('scrollProgress');
+  const backToTop      = document.getElementById('backToTop');
+
+  function onScroll() {
+    const scrollTop    = window.scrollY;
+    const docHeight    = document.documentElement.scrollHeight - window.innerHeight;
+    const pct          = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    scrollProgress.style.width = pct + '%';
+
+    if (scrollTop > 500) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── Auto-highlight category cards every ~2.5s ──────────── */
+  const catCards = Array.from(document.querySelectorAll('#catGrid .cat-card'));
+  let highlightIndex = 0;
+  let highlightTimer  = null;
+  let highlightPaused = false;
+
+  function highlightNext() {
+    if (highlightPaused || catCards.length === 0) return;
+    catCards.forEach(card => card.classList.remove('auto-highlight'));
+    catCards[highlightIndex].classList.add('auto-highlight');
+    highlightIndex = (highlightIndex + 1) % catCards.length;
+  }
+
+  function startHighlightCycle() {
+    highlightNext();
+    highlightTimer = setInterval(highlightNext, 2500);
+  }
+
+  function stopHighlightCycle() {
+    clearInterval(highlightTimer);
+    catCards.forEach(card => card.classList.remove('auto-highlight'));
+  }
+
+  // Only cycle while the category section is actually on screen (saves work off-screen)
+  const catGrid = document.getElementById('catGrid');
+  const catSectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        startHighlightCycle();
+      } else {
+        stopHighlightCycle();
+      }
+    });
+  }, { threshold: 0.3 });
+  catSectionObserver.observe(catGrid);
+
+  // Pause the auto-cycle when a user is actively hovering a card themselves
+  catCards.forEach(card => {
+    card.addEventListener('mouseenter', () => { highlightPaused = true; card.classList.remove('auto-highlight'); });
+    card.addEventListener('mouseleave', () => { highlightPaused = false; });
+  });
+
+  // Respect reduced-motion preference: skip the auto-highlight cycle entirely
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    stopHighlightCycle();
+    catSectionObserver.disconnect();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wishify — Birthday Wish</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="view.css">
+</head>
+<body>
+
+  <audio id="bg-music" loop preload="auto" style="display:none;"></audio>
+<button id="audio-toggle" onclick="toggleMute()" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;z-index:1000;width:50px;height:50px;border-radius:50%;background:rgba(12,12,20,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);color:#f4c842;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);">🔇</button>
+  <div id="wish-card">
+    <p class="eyebrow">✨ Special Day ✨</p>
+    <div class="emoji-row">🎂 🎈 🎉</div>
+
+    <h1 id="view-heading">Happy Birthday, <span id="view-name"></span>! 🎂</h1>
+    <p id="view-date"></p>
+
+    <div class="divider"><span>🎉</span></div>
+
+    <div class="photo-box" id="view-photo-box">
+      <div id="photo-placeholder">
+        <span>📸</span>
+        <p>No photo added</p>
+      </div>
+    </div>
+
+    <div class="message-card">
+      <p id="view-message"></p>
+    </div>
+
+    <div class="from-row">
+      <div class="avatar" id="view-avatar"></div>
+      <div>
+        <div class="from-label">With all the love, from</div>
+        <div id="view-from"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+
+  var audioEl = document.getElementById('bg-music');
+  var audioToggleBtn = document.getElementById('audio-toggle');
+
+  function initAudio(url) {
+    if (!url) return;
+    audioEl.src = url;
+    audioToggleBtn.style.display = 'flex';
+    audioEl.volume = 0.5;
+
+    // Autoplay attempt
+    audioEl.play().then(() => {
+      audioToggleBtn.textContent = '🔊';
+    }).catch(() => {
+      // Wait for user interaction to start audio
+      document.addEventListener('click', function enable() {
+        audioEl.play();
+        audioToggleBtn.textContent = '🔊';
+        document.removeEventListener('click', enable);
+      }, { once: true });
+    });
+  }
+
+  function toggleMute() {
+    if (audioEl.muted) {
+      audioEl.muted = false;
+      audioToggleBtn.textContent = '🔊';
+    } else {
+      audioEl.muted = true;
+      audioToggleBtn.textContent = '🔇';
+    }
+  } 
+  async function loadWish() {
+    var params = new URLSearchParams(window.location.search);
+    var slug = params.get('slug');
+
+    // NEW: If there is no ?slug= in the URL, grab it from the clean URL path!
+    if (!slug) {
+      var pathParts = window.location.pathname.split('/').filter(Boolean);
+      // If the URL is /timeline/yspeP0zq, this grabs the last part (yspeP0zq)
+      if (pathParts.length >= 2) {
+        slug = pathParts[pathParts.length - 1]; 
+      }
+    }
+    if (!slug) {
+      document.body.innerHTML = '<p style="text-align:center;margin-top:50px;">No wish found.</p>';
+      return;
+    }
+
+    try {
+      const response = await fetch('https://wishify.onrender.com/api/pages/' + slug);
+      const result = await response.json();
+
+      if (!result.success) {
+        document.body.innerHTML = '<p style="text-align:center;margin-top:50px;">Wish not found.</p>';
+        return;
+      }
+
+      const page = result.page;
+      const data = page.data;
+
+      // 🎵 ADD THIS LINE: Initialize audio immediately after data is loaded
+      if (data.audioUrl) initAudio(data.audioUrl);
+
+      document.getElementById('view-name').textContent = data.name;
+      document.getElementById('view-avatar').textContent = data.name.charAt(0).toUpperCase();
+      document.getElementById('view-from').textContent = data.from;
+      document.getElementById('view-message').textContent = data.message;
+
+      if (data.date) {
+        const d = new Date(data.date + 'T00:00:00');
+        document.getElementById('view-date').textContent = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
+
+      if (data.photoUrl) {
+        document.getElementById('view-photo-box').innerHTML = `<img src="${data.photoUrl}" style="width:100%;border-radius:12px;">`;
+      }
+
+      if (data.bgTop && data.bgBottom) {
+        document.getElementById('wish-card').style.background =
+          'linear-gradient(160deg, ' + data.bgTop + ' 0%, ' + data.bgBottom + ' 100%)';
+      }
+
+      if (data.font) {
+        document.getElementById('view-heading').style.fontFamily = data.font;
+      }
+
+    } catch (err) {
+      document.body.innerHTML = '<p style="text-align:center;margin-top:50px;">Could not load wish. Is the server running?</p>';
+    }
+  }
+
+  loadWish();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wishify — Wedding Invitation Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,900;1,500;1,600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:#0d0d10;color:#f2f2f2;}
+  .serif{font-family:'Playfair Display',serif;}
+
+  /* Editor UI Styles */
+  .navbar{display:flex;align-items:center;gap:1rem;padding:.9rem 1.4rem;background:#111114;border-bottom:1px solid rgba(212,175,55,.2);position:sticky;top:0;z-index:50;}
+  .nav-logo{font-weight:800;font-size:1.05rem;}
+  .nav-badge{background:rgba(212,175,55,.14);color:#e8cf7e;font-size:.7rem;font-weight:700;padding:.3rem .7rem;border-radius:20px;letter-spacing:.03em;}
+  .nav-step{margin-left:auto;font-size:.78rem;color:rgba(255,255,255,.4);}
+
+  .editor-layout{display:grid;grid-template-columns:400px 1fr;height:calc(100vh - 58px);}
+  .left-panel{background:#111114;border-right:1px solid rgba(212,175,55,.15);overflow-y:auto;padding-bottom: 2rem;}
+  
+  .panel-section{padding:1.3rem 1.4rem;border-bottom:1px solid rgba(255,255,255,.06);}
+  .section-label{font-size:.78rem;font-weight:800;color:#e8cf7e;letter-spacing:.03em;margin-bottom:1rem;text-transform:uppercase;}
+  .field{margin-bottom:.9rem;}
+  .field label{display:block;font-size:.72rem;color:rgba(255,255,255,.5);margin-bottom:.35rem;font-weight:700;letter-spacing:.02em;}
+  .field input[type=text], .field input[type=datetime-local], .field textarea{width:100%;background:#1a1a1e;border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:8px;padding:.55rem .7rem;font-family:'Nunito',sans-serif;font-size:.85rem;outline:none;}
+  .field input:focus, .field textarea:focus{border-color:#d4af37;}
+  .field textarea{resize:vertical;min-height:70px;}
+  .field-row{display:flex;gap:.6rem;}
+  .field-row .field{flex:1;}
+
+  .upload-zone{display:flex;align-items:center;justify-content:center;gap:.4rem;background:#1a1a1e;border:1.5px dashed rgba(212,175,55,.35);border-radius:8px;padding:.6rem;cursor:pointer;font-size:.78rem;color:rgba(255,255,255,.6);transition:border-color .15s;}
+  .upload-zone:hover{border-color:#d4af37;background:#1e1e22;}
+  .upload-zone input{display:none;}
+  .color-picker-row{display:flex;align-items:center;gap:.6rem;}
+  .color-picker-row input[type=color]{width:38px;height:38px;border:none;border-radius:8px;background:none;cursor:pointer;padding:0;}
+  .color-hex-display{font-size:.78rem;color:rgba(255,255,255,.5);font-family:monospace;}
+
+  .photo-block{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.7rem;margin-bottom:.7rem;background:#151519;}
+  .gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+
+  .share-section{padding:1.4rem;background:#0f0f12;}
+  #generate-btn{width:100%;background:linear-gradient(135deg,#f0dd9e,#d4af37);color:#1a0010;border:none;padding:.85rem;border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer;}
+  .result-area{margin-top:1rem;display:none;background:#1a1a1e;border-radius:10px;padding:.8rem;border:1px solid rgba(212,175,55,.25);}
+  .result-area.show{display:block;}
+  .result-url{display:block;font-size:.78rem;color:#e8cf7e;word-break:break-all;margin-bottom:.6rem;}
+  .result-actions{display:flex;gap:.5rem; margin-top:1rem;}
+  .result-btn{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;padding:.5rem;border-radius:8px;font-size:.75rem;cursor:pointer;font-weight:700;}
+
+  /* --- LIVE PREVIEW (MATCHING NEW DESIGN) --- */
+  .right-panel{background:#fff;overflow-y:auto; position: relative; color: #2c3e50;}
+  .preview-topbar{display:flex;align-items:center;gap:.6rem;padding:.8rem 1.4rem;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:1000;}
+  .preview-label{font-size:.78rem;color:#999;font-weight:700;}
+  .live-dot{font-size:.68rem;background:rgba(46,157,88,.18);color:#2e9d58;padding:.2rem .6rem;border-radius:20px;font-weight:800;}
+
+  #preview-card{position: relative; overflow: hidden; min-height: 100vh;}
+  
+  /* Glass Envelope */
+  .prev-envelope { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffe4e1; background-size: cover; background-position: center; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 2rem; transition: transform 0.8s; }
+  .prev-envelope.opened { transform: translateY(-100%); }
+  .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 20px; padding: 3rem 2rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.5); }
+  .heart-icon { width: 40px; height: 40px; margin-bottom: 1rem; }
+  .env-to { font-size: 1rem; color: #333; margin-bottom: 0.5rem; font-weight: 600;}
+  .env-names { font-size: 2.2rem; color: var(--accent); margin-bottom: 0.5rem; line-height: 1.2; }
+  .env-date { font-size: 0.85rem; color: #555; margin-bottom: 1.5rem; }
+  .env-msg { font-size: 0.8rem; color: var(--accent); margin-bottom: 2rem; font-weight: 600;}
+  .env-btn { background: var(--accent); color: #fff; padding: 0.8rem 2.5rem; border-radius: 50px; font-weight: 700; border: none; cursor: pointer; font-family: 'Nunito', sans-serif; box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);}
+
+  /* Hero Section */
+  .prev-hero{position:relative;min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 1.4rem; background: #ffe4e1; background-size: cover; background-position: center; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.3);}
+  .prev-hero::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.3); z-index: 1;}
+  .prev-hero > * { position: relative; z-index: 2; }
+  .prev-names{font-size:clamp(2.5rem,6vw,4rem);font-weight:700;line-height:1.15;margin-bottom:.9rem;}
+  .prev-names .amp{font-style:italic;font-weight:500;padding:0 .4rem;}
+
+  /* General Sections */
+  .prev-section{padding:4rem 1.4rem; background: var(--bg1); text-align: center;}
+  .prev-section h2{font-size:clamp(1.8rem,3.4vw,2.2rem);font-weight:700;margin-bottom:1rem; color: #2c3e50;}
+  .prev-section p.sub{color:#666; max-width:400px;margin:0 auto 2rem;font-size:.9rem;line-height:1.6;}
+
+  /* Couple Circular Photos */
+  .prev-couple{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;}
+  .prev-couple-person{max-width:220px;}
+  .prev-couple-photo{width:160px;height:160px;border-radius:50%;margin:0 auto 1rem;object-fit:cover; border: 5px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.08);}
+  .prev-couple-person h3{font-size:1.3rem;font-weight:700;margin-bottom:.3rem; color: #2c3e50;}
+  .prev-couple-parent{font-size:.8rem;color:#777;margin-bottom:.4rem;}
+  .prev-couple-tagline{font-size:.8rem;color:var(--accent);font-style:italic;}
+
+  /* 3D Gallery CSS */
+  .carousel-container { position: relative; width: 100%; height: 350px; perspective: 1000px; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-top: 2rem;}
+  .gallery-slide { position: absolute; width: 220px; height: 300px; border-radius: 15px; transition: all 0.5s ease; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 2px solid #fff;}
+  .gallery-slide.center { transform: translateX(0) translateZ(0) rotateY(0); z-index: 3; opacity: 1; }
+  .gallery-slide.left { transform: translateX(-65%) translateZ(-150px) rotateY(35deg); z-index: 2; opacity: 0.8; }
+  .gallery-slide.right { transform: translateX(65%) translateZ(-150px) rotateY(-35deg); z-index: 2; opacity: 0.8; }
+  .gallery-slide.hidden { transform: translateZ(-300px); z-index: 1; opacity: 0; pointer-events: none; }
+  .carousel-controls { margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; align-items: center;}
+  .car-btn { background: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer;}
+  
+  /* Events & Countdown */
+  /* --- EVENT CARDS --- */
+  .prev-section h2.event-title { font-size: clamp(1.8rem,4vw,2.2rem); margin-bottom: 3rem; color: #2c3e50; font-weight: 500; }
+  .prev-events { max-width: 900px; margin: 0 auto; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+  .prev-event-card { flex: 1 1 300px; max-width: 400px; background: var(--card, #ffffff); border-radius: 24px; padding: 3rem 2rem; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: none; }
+  .card-icon-wrap { width: 65px; height: 65px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.06); color: var(--accent); }
+  .card-icon-wrap svg { width: 28px; height: 28px; stroke: currentColor; stroke-width: 2; fill: none; }
+  .prev-event-card h3 { font-size: 1.5rem; font-weight: 500; margin-bottom: 2rem; color: #2c3e50; }
+  .event-detail-line { display: flex; align-items: flex-start; justify-content: center; gap: 0.8rem; font-size: 0.9rem; color: #555; margin-bottom: 1.2rem; line-height: 1.6; text-align: left; max-width: 250px; margin-left: auto; margin-right: auto;}
+  .event-detail-line svg { width: 18px; height: 18px; stroke: var(--accent); flex-shrink: 0; margin-top: 3px; fill: none; stroke-width: 2; }
+  .event-detail-line b { display: block; color: #333; font-weight: 700; margin-top: 0.5rem; font-size: 0.85rem;}
+
+  @media (max-width:900px){ .editor-layout{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">✨ Wishify</div>
+  <div class="nav-badge">Wedding Editor</div>
+</nav>
+
+<div class="editor-layout">
+
+  <aside class="left-panel">
+    
+    <div class="panel-section">
+      <div class="section-label">🌟 Backgrounds</div>
+      <div class="field">
+        <label>Hero & Envelope Background (Image)</label>
+        <label class="upload-zone"><input type="file" accept="image/*" onchange="handlePhoto(this,'hbg','prev-envelope', true)"/><span id="hbg-label">📁 Upload Hero Image</span></label>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">💍 Details</div>
+      <div class="field-row">
+        <div class="field"><label>Bride</label><input type="text" id="bride-name" value="Ashvini"/></div>
+        <div class="field"><label>Groom</label><input type="text" id="groom-name" value="Rishikesh"/></div>
+      </div>
+      <div class="field"><label>Date</label><input type="text" id="wedding-date" value="April 28, 2026"/></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">👰🤵 Couple Portraits</div>
+      <div class="photo-block">
+        <div class="field"><label>Bride's Photo</label><label class="upload-zone"><input type="file" accept="image/*" onchange="handlePhoto(this,'bride','prev-bride-photo')"/><span id="bride-label">📁 Upload</span></label></div>
+        <div class="field"><label>Parent Line</label><input type="text" id="bride-parent" value="Daughter of Smt. Savita"/></div>
+      </div>
+      <div class="photo-block">
+        <div class="field"><label>Groom's Photo</label><label class="upload-zone"><input type="file" accept="image/*" onchange="handlePhoto(this,'groom','prev-groom-photo')"/><span id="groom-label">📁 Upload</span></label></div>
+        <div class="field"><label>Parent Line</label><input type="text" id="groom-parent" value="Son of Smt. Kavita"/></div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">📸 3D Gallery (Upload 3-6)</div>
+      <div class="gallery-grid">
+        <label class="upload-zone"><input type="file" accept="image/*" onchange="handleGallery(this, 0)"/><span id="g0-label">📁 Photo 1</span></label>
+        <label class="upload-zone"><input type="file" accept="image/*" onchange="handleGallery(this, 1)"/><span id="g1-label">📁 Photo 2</span></label>
+        <label class="upload-zone"><input type="file" accept="image/*" onchange="handleGallery(this, 2)"/><span id="g2-label">📁 Photo 3</span></label>
+        <label class="upload-zone"><input type="file" accept="image/*" onchange="handleGallery(this, 3)"/><span id="g3-label">📁 Photo 4</span></label>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">💒 Event Details</div>
+      <div class="field"><label>Ceremony Name</label><input type="text" id="ceremony-title" value="Ring Ceremony"/></div>
+      <div class="field-row">
+        <div class="field"><label>Date</label><input type="text" id="ceremony-date" value="Monday, April 27, 2026"/></div>
+        <div class="field"><label>Time</label><input type="text" id="ceremony-time" value="04:00 PM to 6:00 PM"/></div>
+      </div>
+      <div class="field"><label>Venue & Address</label><input type="text" id="ceremony-venue" value="Bhagwati Lawns, Kolhar-bableshwar road"/></div>
+
+      <div class="field" style="margin-top:1.5rem;"><label>Reception Name</label><input type="text" id="reception-title" value="Haldi Ceremony"/></div>
+      <div class="field-row">
+        <div class="field"><label>Date</label><input type="text" id="reception-date" value="Monday, April 27, 2026"/></div>
+        <div class="field"><label>Time</label><input type="text" id="reception-time" value="06:00 PM onwards"/></div>
+      </div>
+      <div class="field"><label>Venue & Address</label><input type="text" id="reception-venue" value="Bhagwati Lawns, Kolhar-bableshwar road"/></div>
+    </div>
+
+    <div class="field" style="margin-top:1.5rem;"><label>Wedding Name</label><input type="text" id="wedding-title" value="Wedding Ceremony"/></div>
+      <div class="field-row">
+        <div class="field"><label>Date</label><input type="text" id="wedding-date" value="Tuesday, April 28, 2026"/></div>
+        <div class="field"><label>Time</label><input type="text" id="wedding-time" value="12:28 PM onwards"/></div>
+      </div>
+      <div class="field"><label>Venue & Address</label><input type="text" id="wedding-venue" value="Bhagwati Lawns, Kolhar-bableshwar road, Dist Ahilyanagar, Maharashtra"/></div>
+
+    <div class="panel-section">
+      <div class="section-label">🎨 Colors (Light Theme)</div>
+      <div class="field"><label>Main Background (Pastel)</label><div class="color-picker-row"><input type="color" id="bg-color1" value="#fff0f5"/></div></div>
+      <div class="field"><label>Accent Color (Pink/Red)</label><div class="color-picker-row"><input type="color" id="accent-color" value="#ff4d79"/></div></div>
+      <div class="field"><label>Card Background</label><div class="color-picker-row"><input type="color" id="card-color" value="#ffffff"/></div></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">🎵 Background Music</div>
+      <div class="field">
+        <label class="upload-zone"><input type="file" accept="audio/*" onchange="handleAudioUpload(this)"/><span id="audio-label">📁 Upload MP3</span></label>
+      </div>
+    </div>
+
+    <div class="share-section">
+      <button id="generate-btn">✨ Generate Shareable Link</button>
+      <div class="result-area" id="result-area">
+        <span class="result-url" id="result-link"></span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="right-panel">
+    <div class="preview-topbar">
+      <span class="preview-label">Live Preview (Light Theme)</span>
+      <span class="live-dot">Live</span>
+    </div>
+
+    <div id="preview-card">
+      
+      <div class="prev-envelope" id="prev-envelope">
+        <div class="glass-card">
+          <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <div class="env-to">The Wedding Of</div>
+          <div class="env-names serif"><span class="b-name">Ashvini</span> &amp; <span class="g-name">Rishikesh</span></div>
+          <div class="env-date w-date">April 28, 2026</div>
+          <div class="env-msg">Dear Guest,<br>You are invited to celebrate our special day</div>
+          <button class="env-btn" onclick="document.getElementById('prev-envelope').classList.add('opened')">Open Invitation</button>
+        </div>
+      </div>
+
+      <div class="prev-hero" id="prev-hero-bg">
+        <svg class="heart-icon" style="stroke:#fff; width:50px; height:50px;" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        <div style="font-size:0.9rem; margin-bottom:1rem; letter-spacing:0.1em;">The Wedding Celebration of</div>
+        <h1 class="prev-names serif"><span class="b-name">Ashvini</span> <span class="amp">&amp;</span> <span class="g-name">Rishikesh</span></h1>
+        <div class="prev-date w-date" style="color:#fff;">April 28, 2026</div>
+      </div>
+
+      <div class="prev-section" style="background: var(--bg1);">
+        <h2 class="serif">The Happy Couple</h2>
+        <div class="prev-couple">
+          <div class="prev-couple-person">
+            <img class="prev-couple-photo" id="prev-bride-photo" src="https://via.placeholder.com/200" alt="Bride"/>
+            <h3 class="serif b-name">Ashvini</h3>
+            <div class="prev-couple-parent" id="prev-bride-parent">Daughter of Smt. Savita</div>
+          </div>
+          <div class="prev-couple-person">
+            <img class="prev-couple-photo" id="prev-groom-photo" src="https://via.placeholder.com/200" alt="Groom"/>
+            <h3 class="serif g-name">Rishikesh</h3>
+            <div class="prev-couple-parent" id="prev-groom-parent">Son of Smt. Kavita</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prev-section" style="background: var(--bg1);">
+        <h2 class="serif">Our Gallery</h2>
+        <div class="carousel-container">
+          <img src="https://via.placeholder.com/250x350/ffe4e1/ff4d79?text=1" class="gallery-slide center" id="g-slide-0"/>
+          <img src="https://via.placeholder.com/250x350/ffe4e1/ff4d79?text=2" class="gallery-slide right" id="g-slide-1"/>
+          <img src="https://via.placeholder.com/250x350/ffe4e1/ff4d79?text=3" class="gallery-slide hidden" id="g-slide-2"/>
+          <img src="https://via.placeholder.com/250x350/ffe4e1/ff4d79?text=4" class="gallery-slide left" id="g-slide-3"/>
+        </div>
+        <div class="carousel-controls">
+          <button class="car-btn" onclick="moveGallery(-1)">❮</button>
+          <button class="car-btn" onclick="moveGallery(1)">❯</button>
+        </div>
+      </div>
+      <div class="prev-section" style="background: var(--bg1);">
+        <h2 class="serif event-title">Event Details</h2>
+        <div class="prev-events">
+          
+          <div class="prev-event-card">
+            <div class="card-icon-wrap"><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"></path></svg></div>
+            <h3 class="serif c-title">Ring Ceremony</h3>
+            <div class="event-detail-line">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <div><span class="c-date">Monday, April 27, 2026</span><br><b class="c-time">04:00 PM to 6:00 PM</b></div>
+            </div>
+            <div class="event-detail-line">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <div><span class="c-venue">Bhagwati Lawns, Kolhar-bableshwar road</span></div>
+            </div>
+          </div>
+
+          <div class="prev-event-card">
+            <div class="card-icon-wrap"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+            <h3 class="serif r-title">Haldi Ceremony</h3>
+            <div class="event-detail-line">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <div><span class="r-date">Monday, April 27, 2026</span><br><b class="r-time">06:00 PM onwards</b></div>
+            </div>
+            <div class="event-detail-line">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <div><span class="r-venue">Bhagwati Lawns, Kolhar-bableshwar road</span></div>
+            </div>
+          </div>
+
+          <div class="prev-event-card" id="card-wedding">
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+        </div>
+        <h3 class="serif w-title" id="prev-wedding-title">Wedding Ceremony</h3>
+        
+        <div class="event-detail-line">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <div><span class="w-event-date" id="prev-wedding-date">Tuesday, April 28, 2026</span><br><b class="w-event-time" id="prev-wedding-time">12:28 PM onwards</b></div>
+        </div>
+        
+        <div class="event-detail-line">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <div><span class="w-venue" id="prev-wedding-venue">Bhagwati Lawns, Kolhar-bableshwar road</span></div>
+        </div>
+      </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  let photos = { g: [] };
+  let audioUrl = '';
+  
+  // Set Initial CSS Variables
+  document.documentElement.style.setProperty('--bg1', '#fff0f5');
+  document.documentElement.style.setProperty('--accent', '#ff4d79');
+  document.documentElement.style.setProperty('--card', '#ffffff');
+
+  // Live Binding
+  function bindText(inputId, classQuery) {
+    document.getElementById(inputId).addEventListener('input', function(e) {
+      document.querySelectorAll(classQuery).forEach(el => el.textContent = e.target.value);
+    });
+  }
+  bindText('bride-name', '.b-name');
+  bindText('groom-name', '.g-name');
+  bindText('wedding-date', '.w-date');
+  bindText('ceremony-title', '.c-title');
+  bindText('ceremony-date', '.c-date');
+  bindText('ceremony-time', '.c-time');
+  bindText('ceremony-venue', '.c-venue');
+  
+  bindText('reception-title', '.r-title');
+  bindText('reception-date', '.r-date');
+  bindText('reception-time', '.r-time');
+  bindText('reception-venue', '.r-venue');
+
+  bindText('wedding-title', '.w-title');
+  bindText('wedding-date', '.w-event-date');
+  bindText('wedding-time', '.w-event-time');
+  bindText('wedding-venue', '.w-venue');
+  
+  document.getElementById('bride-parent').addEventListener('input', e => document.getElementById('prev-bride-parent').textContent = e.target.value);
+  document.getElementById('groom-parent').addEventListener('input', e => document.getElementById('prev-groom-parent').textContent = e.target.value);
+
+  // Color Listeners
+  document.getElementById('bg-color1').addEventListener('input', e => document.documentElement.style.setProperty('--bg1', e.target.value));
+  document.getElementById('accent-color').addEventListener('input', e => document.documentElement.style.setProperty('--accent', e.target.value));
+  document.getElementById('card-color').addEventListener('input', e => document.documentElement.style.setProperty('--card', e.target.value));
+
+  // Gallery 3D Logic (Preview)
+  let currIndex = 0;
+  function moveGallery(dir) {
+    const slides = document.querySelectorAll('.gallery-slide');
+    if(slides.length === 0) return;
+    currIndex = (currIndex + dir + slides.length) % slides.length;
+    
+    slides.forEach((s, i) => {
+      s.className = 'gallery-slide'; 
+      if (i === currIndex) s.classList.add('center');
+      else if (i === (currIndex - 1 + slides.length) % slides.length) s.classList.add('left');
+      else if (i === (currIndex + 1) % slides.length) s.classList.add('right');
+      else s.classList.add('hidden');
+    });
+  }
+
+  // File Uploads
+  async function uploadToCloudinary(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const res = await fetch('https://wishify.onrender.com/api/upload', {
+            method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ data: e.target.result })
+          });
+          const result = await res.json();
+          if(result.success) resolve(result.url); else reject('Upload failed');
+        } catch(err){ reject(err); }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handlePhoto(input, key, previewId, isBg = false) {
+    if(!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      if(isBg) {
+        document.getElementById('prev-envelope').style.backgroundImage = `url('${e.target.result}')`;
+        document.getElementById('prev-hero-bg').style.backgroundImage = `url('${e.target.result}')`;
+      } else {
+        document.getElementById(previewId).src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(input.files[0]);
+    
+    let lbl = document.getElementById(key + '-label');
+    lbl.textContent = '⏳ Uploading...';
+    try {
+      photos[key] = await uploadToCloudinary(input.files[0]);
+      lbl.textContent = '✅ Uploaded';
+    } catch(err) { lbl.textContent = '❌ Error'; }
+  }
+
+  async function handleGallery(input, index) {
+    if(!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => { document.getElementById(`g-slide-${index}`).src = e.target.result; };
+    reader.readAsDataURL(input.files[0]);
+    
+    let lbl = document.getElementById(`g${index}-label`);
+    lbl.textContent = '⏳ ...';
+    try {
+      photos.g[index] = await uploadToCloudinary(input.files[0]);
+      lbl.textContent = '✅';
+    } catch(err) { lbl.textContent = '❌'; }
+  }
+
+  async function handleAudioUpload(input){
+    if(!input.files[0]) return;
+    let lbl = document.getElementById('audio-label');
+    lbl.textContent = '⏳ Uploading...';
+    try {
+      audioUrl = await uploadToCloudinary(input.files[0]);
+      lbl.textContent = '✅ Audio Ready';
+    } catch(err) { lbl.textContent = '❌ Failed'; }
+  }
+
+  // Submit to DB
+  document.getElementById('generate-btn').addEventListener('click', async function(){
+    const btn = this;
+    btn.textContent = 'Generating...';
+    
+    const data = {
+      template: 'wedding-invitation',
+      data: {
+        brideName: document.getElementById('bride-name').value,
+        groomName: document.getElementById('groom-name').value,
+        weddingDate: document.getElementById('wedding-date').value,
+        brideParent: document.getElementById('bride-parent').value,
+        groomParent: document.getElementById('groom-parent').value,
+        bgColor1: document.documentElement.style.getPropertyValue('--bg1').trim(),
+        accentColor: document.documentElement.style.getPropertyValue('--accent').trim(),
+        cardColor: document.documentElement.style.getPropertyValue('--card').trim(),
+        ceremonyTitle: document.getElementById('ceremony-title').value,
+        ceremonyDate: document.getElementById('ceremony-date').value,
+        ceremonyTime: document.getElementById('ceremony-time').value,
+        ceremonyVenue: document.getElementById('ceremony-venue').value,
+        receptionTitle: document.getElementById('reception-title').value,
+        receptionDate: document.getElementById('reception-date').value,
+        receptionTime: document.getElementById('reception-time').value,
+        receptionVenue: document.getElementById('reception-venue').value,
+        weddingTitle: document.getElementById('wedding-title').value,
+        weddingDate: document.getElementById('wedding-date').value,
+        weddingTime: document.getElementById('wedding-time').value,
+        weddingVenue: document.getElementById('wedding-venue').value,
+        heroBgUrl: photos['hbg'] || '',
+        bridePhotoUrl: photos['bride'] || '',
+        groomPhotoUrl: photos['groom'] || '',
+        audioUrl: audioUrl,
+        photos: photos.g.map(url => ({ url })).filter(p => p.url) // Filter empty slots
+      }
+    };
+
+    try {
+      const res = await fetch('https://wishify.onrender.com/api/pages', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+      const result = await res.json();
+      if(result.success) {
+        document.getElementById('result-link').textContent = window.location.origin + '/wedding/' + result.slug;
+        document.getElementById('result-area').classList.add('show');
+        btn.textContent = '✅ Ready to Share!';
+      }
+    } catch(err) { alert('Server error'); btn.textContent = 'Try Again'; }
+  });
+</script>
+</body>
+</html>
